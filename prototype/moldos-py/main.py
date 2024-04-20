@@ -83,23 +83,23 @@ with mp_holistic.Holistic(min_detection_confidence=0.45, min_tracking_confidence
             # print(e)
             pass
                 
-        # # Right hand
-        # mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
-        #                           mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
-        #                           mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
-        #                          )
+        # Right hand
+        mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
+                                  mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
+                                 )
 
-        # # Left Hand
-        # mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
-        #                           mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4),
-        #                           mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
-        #                          )
+        # Left Hand
+        mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, 
+                                  mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
+                                 )
 
-        # # Pose
-        # mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS, 
-        #                           mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4),
-        #                           mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
-        #                          )
+        # Pose
+        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS, 
+                                  mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
+                                 )
         
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)                
         cv2.imshow('Raw Webcam Feed', cv2.flip(image, 1))
