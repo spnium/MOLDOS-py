@@ -30,29 +30,29 @@ while cap.isOpened():
         pose_pos = []
         lhand_pos = []
         rhand_pos = []
-        myHands = []
+        _Hands = []
         handsType = []
         try:
             for hand in hands_results.multi_handedness:
                 handType=hand.classification[0].label
                 handsType.append(handType)
             for handLandMarks in hands_results.multi_hand_landmarks:
-                myHand = []
+                Hand_ = []
                 for landMark in handLandMarks.landmark:
-                    myHand.append(translatepos(((landMark.x), (landMark.y))))
-                myHands.append(myHand)
+                    Hand_.append(translatepos(((landMark.x), (landMark.y))))
+                _Hands.append(Hand_)
             
             try:
                 handsType[1]
-                rhand_pos = myHands[1]
-                lhand_pos = myHands[0]
+                rhand_pos = _Hands[1]
+                lhand_pos = _Hands[0]
             except:
-                if handsType[0] == "Right" and myHands:
-                    rhand_pos = myHands[0]
+                if handsType[0] == "Right" and _Hands:
+                    rhand_pos = _Hands[0]
                     for i in HandLandmark:
                         lhand_pos.append("N/A")
-                elif handsType[0] == "Left" and myHands:
-                    lhand_pos = myHands[0]
+                elif handsType[0] == "Left" and _Hands:
+                    lhand_pos = _Hands[0]
                     for i in HandLandmark:
                         rhand_pos.append("N/A")
                 else:
