@@ -24,67 +24,68 @@ class Detector:
 
     def __get_pose_pos(self):
         pose_results = self.pose_results
+        pose_pos = []
+        
         try:
             poselandmarks = pose_results.pose_landmarks.landmark
-            pose_pos = []
-            
-            for i in PoseLandmark:
-                try:
-                    # 1280-0 -> 0-1280
-                    x, y = translatepos(get_pos(poselandmarks, i))
-                    pose_pos.append((1280 - x, y))
-
-                except Exception as e:
-                    pose_pos.append("N/A")
-            
+        except AttributeError:
+            for _ in PoseLandmark:
+                pose_pos.append("N/A")
             self.pose_pos = pose_pos
-            
-        except Exception as e:
-            pass
+        
+        for i in PoseLandmark:
+            try:
+                # 1280-0 -> 0-1280
+                x, y = translatepos(get_pos(poselandmarks, i))
+                pose_pos.append((1280 - x, y))
+
+            except Exception as e:
+                pose_pos.append("N/A")
+        
+        self.pose_pos = pose_pos
     
     def __get_hands_pos(self):
         hands_results = self.hands_results
+        lhand_pos = []
+        rhand_pos = []
+        _Hands = []
+        handsType = []
         try:
-            lhand_pos = []
-            rhand_pos = []
-            _Hands = []
-            handsType = []
+            for hand in hands_results.multi_handedness:
+                handType=hand.classification[0].label
+                handsType.append(handType)
+            for handLandMarks in hands_results.multi_hand_landmarks:
+                Hand_ = []
+                for landMark in handLandMarks.landmark:
+                    Hand_.append(translatepos(((landMark.x), (landMark.y))))
+                _Hands.append(Hand_)
+            
             try:
-                for hand in hands_results.multi_handedness:
-                    handType=hand.classification[0].label
-                    handsType.append(handType)
-                for handLandMarks in hands_results.multi_hand_landmarks:
-                    Hand_ = []
-                    for landMark in handLandMarks.landmark:
-                        Hand_.append(translatepos(((landMark.x), (landMark.y))))
-                    _Hands.append(Hand_)
-                
-                try:
-                    handsType[1]
-                    rhand_pos = _Hands[1]
+                handsType[1]
+                rhand_pos = _Hands[1]
+                lhand_pos = _Hands[0]
+            except:
+                if handsType[0] == "Right" and _Hands:
+                    rhand_pos = _Hands[0]
+                    for _ in HandLandmark:
+                        lhand_pos.append("N/A")
+                elif handsType[0] == "Left" and _Hands:
                     lhand_pos = _Hands[0]
-                except:
-                    if handsType[0] == "Right" and _Hands:
-                        rhand_pos = _Hands[0]
-                        for _ in HandLandmark:
-                            lhand_pos.append("N/A")
-                    elif handsType[0] == "Left" and _Hands:
-                        lhand_pos = _Hands[0]
-                        for _ in HandLandmark:
-                            rhand_pos.append("N/A")
-                    else:
-                        for _ in HandLandmark:
-                            rhand_pos.append("N/A")
-                            lhand_pos.append("N/A")
-                    
-            except Exception as e:
-                pass
-            
-            self.rhand_pos = rhand_pos
-            self.lhand_pos = lhand_pos
-            
+                    for _ in HandLandmark:
+                        rhand_pos.append("N/A")
+                else:
+                    for _ in HandLandmark:
+                        rhand_pos.append("N/A")
+                        lhand_pos.append("N/A")
+                
         except Exception as e:
-            pass
+            for _ in HandLandmark:
+                rhand_pos.append("N/A")
+                lhand_pos.append("N/A")
+        
+        self.rhand_pos = rhand_pos
+        self.lhand_pos = lhand_pos
+        
     
     def check4(self, side):
         posepos = self.pose_pos
