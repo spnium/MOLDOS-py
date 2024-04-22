@@ -8,11 +8,7 @@ while cap.isOpened():
     
     detector.run(image)
     detector.draw()
-    
-    try:
-        print(detector.check4("right"))
-    except:
-        pass
+    print(detector.check_pose(4, "right"))
     
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break

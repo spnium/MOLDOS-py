@@ -8,7 +8,25 @@ from mediapipe.python.solutions.pose import PoseLandmark
 from mediapipe.python.solutions.hands import HandLandmark
 from landmarks.poselandmarks_ import *
 from landmarks.handlandmarks_ import *
-from tools import *
+import numpy as np
+
+aprx = lambda a, b, err=20.0: b + err > a > b - err
+translatepos = lambda x: tuple(np.multiply(x, [1280, 720]).astype(int))
+touching = lambda a, b, x_err=100, y_err=100: aprx(a[0], b[0], x_err) and aprx(a[1], b[1], y_err)
+get_pos = lambda landmarks, landmark: [landmarks[landmark].x, landmarks[landmark].y]
+
+def calculate_angle(a,b,c):
+    a = np.array(a)
+    b = np.array(b) # Mid
+    c = np.array(c)
+    
+    radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
+    angle = np.abs(radians*180.0/np.pi)
+    
+    if angle >180.0:
+        angle = 360-angle
+        
+    return angle
     
 class Detector:
     def __init__(self, hands, pose) -> None:
@@ -29,8 +47,7 @@ class Detector:
         try:
             poselandmarks = pose_results.pose_landmarks.landmark
         except AttributeError:
-            for _ in PoseLandmark:
-                pose_pos.append("N/A")
+            pose_pos = ["N/A" for _ in PoseLandmark]
             self.pose_pos = pose_pos
         
         for i in PoseLandmark:
@@ -50,6 +67,9 @@ class Detector:
         rhand_pos = []
         _Hands = []
         handsType = []
+        
+        _allNA = ["N/A" for _ in HandLandmark]
+        
         try:
             for hand in hands_results.multi_handedness:
                 handType=hand.classification[0].label
@@ -67,16 +87,13 @@ class Detector:
             except:
                 if handsType[0] == "Right" and _Hands:
                     rhand_pos = _Hands[0]
-                    for _ in HandLandmark:
-                        lhand_pos.append("N/A")
+                    lhand_pos = _allNA
                 elif handsType[0] == "Left" and _Hands:
                     lhand_pos = _Hands[0]
-                    for _ in HandLandmark:
-                        rhand_pos.append("N/A")
+                    rhand_pos = _allNA
                 else:
-                    for _ in HandLandmark:
-                        rhand_pos.append("N/A")
-                        lhand_pos.append("N/A")
+                    lhand_pos = _allNA
+                    rhand_pos = _allNA
                 
         except Exception as e:
             for _ in HandLandmark:
@@ -87,7 +104,7 @@ class Detector:
         self.lhand_pos = lhand_pos
         
     
-    def check4(self, side):
+    def check_pose(self, pose, side):
         posepos = self.pose_pos
         rhandpos = self.rhand_pos
         lhandpos = self.lhand_pos
@@ -98,10 +115,17 @@ class Detector:
         elbow = {'left': posepos[LEFT_ELBOW], 'right': posepos[RIGHT_ELBOW]}
         hand = {'left': lhandpos[PINKY_TIP], 'right': rhandpos[PINKY_TIP]}
         
-        l_angle = calculate_angle(hip["left"], shoulder["left"], elbow["left"])
-        r_angle = calculate_angle(hip["right"], shoulder["right"], elbow["right"])
+        pose1 = lambda: False
+        pose2 = lambda: False
+        pose3 = lambda: False
+        pose4 = lambda:touching(hand[side], elbow[anotherside], 60, 60)  and calculate_angle(hip["left"], shoulder["left"], elbow["left"]) > 140 and calculate_angle(hip["right"], shoulder["right"], elbow["right"]) > 140
+        pose5 = lambda: False
+        poses = [pose1, pose2, pose3, pose4, pose5]
         
-        return touching(hand[side], elbow[anotherside], 60, 60)  and l_angle > 140 and r_angle > 140
+        try:
+            return poses[pose - 1]()
+        except Exception as e:
+            return False
     
     def draw(self):
         image = self.image
