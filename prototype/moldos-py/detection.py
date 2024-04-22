@@ -6,6 +6,8 @@ mp_hands = mp.solutions.hands
 mp_pose = mp.solutions.pose
 from mediapipe.python.solutions.pose import PoseLandmark
 from mediapipe.python.solutions.hands import HandLandmark
+from landmarks.poselandmarks_ import *
+from landmarks.handlandmarks_ import *
 from tools import *
     
 class Detector:
@@ -17,9 +19,10 @@ class Detector:
         self.hands_results = self.hands.process(image)
         self.pose_results = self.pose.process(cv2.flip(image, 1))
         self.image = image
-        
+        self.__get_pos()
+
     # returns [pose, lhand, rhand]
-    def get_pos(self):
+    def __get_pos(self):
         hands_results = self.hands_results
         pose_results = self.pose_results
         try:
@@ -75,12 +78,26 @@ class Detector:
             self.pose_pos = pose_pos
             self.lhand_pos = lhand_pos
             self.rhand_pos = rhand_pos
-            
-            return [pose_pos, lhand_pos, rhand_pos]
         
         except Exception as e:
             # print(e)
             pass
+    
+    def check4(self, side):
+        posepos = self.pose_pos
+        rhandpos = self.rhand_pos
+        lhandpos = self.lhand_pos
+        anotherside = 'left' if side == 'right' else 'right'
+        
+        hip = {'left': posepos[LEFT_HIP], 'right': posepos[RIGHT_HIP]}
+        shoulder = {'left': posepos[LEFT_SHOULDER], 'right': posepos[RIGHT_SHOULDER]}
+        elbow = {'left': posepos[LEFT_ELBOW], 'right': posepos[RIGHT_ELBOW]}
+        hand = {'left': lhandpos[PINKY_TIP], 'right': rhandpos[PINKY_TIP]}
+        
+        l_angle = calculate_angle(hip["left"], shoulder["left"], elbow["left"])
+        r_angle = calculate_angle(hip["right"], shoulder["right"], elbow["right"])
+        
+        return touching(hand[side], elbow[anotherside], 60, 60)  and l_angle > 140 and r_angle > 140
     
     def draw(self):
         image = self.image
@@ -117,7 +134,6 @@ if __name__=='__main__':
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
         detector.run(image)
-        pose_pos, lhand_pos, rhand_pos = detector.get_pos()
         detector.draw()
         
         if cv2.waitKey(10) & 0xFF == ord('q'):

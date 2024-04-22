@@ -1,5 +1,6 @@
 from detection import *
 import cv2
+# from exercises import *
 
 cap = cv2.VideoCapture(0)
 while cap.isOpened():
@@ -7,8 +8,12 @@ while cap.isOpened():
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     
     detector.run(image)
-    pose_pos, lhand_pos, rhand_pos = detector.get_pos()
     detector.draw()
+    
+    try:
+        print(detector.check4("right"))
+    except:
+        pass
     
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
