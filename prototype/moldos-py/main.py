@@ -1,6 +1,5 @@
 from detection import *
 import cv2
-# from exercises import *
 
 cap = cv2.VideoCapture(0)
 while cap.isOpened():

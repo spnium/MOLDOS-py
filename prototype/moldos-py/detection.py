@@ -19,16 +19,32 @@ class Detector:
         self.hands_results = self.hands.process(image)
         self.pose_results = self.pose.process(cv2.flip(image, 1))
         self.image = image
-        self.__get_pos()
+        self.__get_pose_pos()
+        self.__get_hands_pos()
 
-    # returns [pose, lhand, rhand]
-    def __get_pos(self):
-        hands_results = self.hands_results
+    def __get_pose_pos(self):
         pose_results = self.pose_results
         try:
             poselandmarks = pose_results.pose_landmarks.landmark
-
             pose_pos = []
+            
+            for i in PoseLandmark:
+                try:
+                    # 1280-0 -> 0-1280
+                    x, y = translatepos(get_pos(poselandmarks, i))
+                    pose_pos.append((1280 - x, y))
+
+                except Exception as e:
+                    pose_pos.append("N/A")
+            
+            self.pose_pos = pose_pos
+            
+        except Exception as e:
+            pass
+    
+    def __get_hands_pos(self):
+        hands_results = self.hands_results
+        try:
             lhand_pos = []
             rhand_pos = []
             _Hands = []
@@ -50,37 +66,24 @@ class Detector:
                 except:
                     if handsType[0] == "Right" and _Hands:
                         rhand_pos = _Hands[0]
-                        for i in HandLandmark:
+                        for _ in HandLandmark:
                             lhand_pos.append("N/A")
                     elif handsType[0] == "Left" and _Hands:
                         lhand_pos = _Hands[0]
-                        for i in HandLandmark:
+                        for _ in HandLandmark:
                             rhand_pos.append("N/A")
                     else:
-                        for i in HandLandmark:
+                        for _ in HandLandmark:
                             rhand_pos.append("N/A")
                             lhand_pos.append("N/A")
                     
             except Exception as e:
-                # print(e)
                 pass
-
-            for i in PoseLandmark:
-                try:
-                    # 1280-0 -> 0-1280
-                    x, y = translatepos(get_pos(poselandmarks, i))
-                    pose_pos.append((1280 - x, y))
-
-                except Exception as e:
-                    print(e)
-                    pose_pos.append("N/A")
             
-            self.pose_pos = pose_pos
-            self.lhand_pos = lhand_pos
             self.rhand_pos = rhand_pos
-        
+            self.lhand_pos = lhand_pos
+            
         except Exception as e:
-            # print(e)
             pass
     
     def check4(self, side):
