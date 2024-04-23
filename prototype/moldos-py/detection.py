@@ -11,7 +11,7 @@ from landmarks.handlandmarks_ import *
 import numpy as np
 
 approximate = lambda a, b, err=20.0: b + err > a > b - err
-translatepos = lambda x: tuple(np.multiply(x, [1280, 720]).astype(int))
+translatepos = lambda x, dimension=(1280, 720): tuple(np.multiply(x, dimension).astype(int))
 touching = lambda a, b, x_err=100, y_err=100: approximate(a[0], b[0], x_err) and approximate(a[1], b[1], y_err)
 
 def calculate_angle(a,b,c):
@@ -60,9 +60,7 @@ class Detector:
         hand_types = []
         hand_pos = []
         
-        if hands_results.multi_hand_landmarks:
-            if len(hands_results.multi_handedness) > 2:
-                raise Exception("Too many hands detected")
+        if hands_results.multi_hand_landmarks and len(hands_results.multi_handedness) <= 2:
                 
             for hand in hands_results.multi_handedness:
                 hand_types.append(hand.classification[0].label)
@@ -95,7 +93,12 @@ class Detector:
         pose1 = lambda: False
         pose2 = lambda: False
         pose3 = lambda: False
-        pose4 = lambda:touching(hand[side], elbow[anotherside], 60, 60)  and calculate_angle(hip["left"], shoulder["left"], elbow["left"]) > 160 and calculate_angle(hip["right"], shoulder["right"], elbow["right"]) > 160
+        
+        def pose4():
+            left_angle = calculate_angle(hip["left"], shoulder["left"], elbow["left"])
+            right_angle = calculate_angle(hip["right"], shoulder["right"], elbow["right"])
+            return touching(hand[side], elbow[anotherside], 60, 60)  and left_angle > 160 and right_angle > 160
+        
         pose5 = lambda: False
         poses = [pose1, pose2, pose3, pose4, pose5]
         
@@ -103,8 +106,9 @@ class Detector:
             return poses[pose - 1]()
         except Exception as e:
             return False
-    
-    def draw(self):
+        
+class DetectorCV(Detector):
+    def draw(self, name="MOLDOS"):
         image = self.image
         hands_results = self.hands_results
         pose_results = self.pose_results
@@ -125,7 +129,7 @@ class Detector:
         image = cv2.flip(image, 1)
         
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)                
-        cv2.imshow('MOLDOS', image)
+        cv2.imshow(name, image)
 
 if __name__=='__main__':
     hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)

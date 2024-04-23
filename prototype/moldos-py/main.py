@@ -1,13 +1,11 @@
 from detection import *
 import cv2
 import mediapipe as mp
-mp_hands = mp.solutions.hands
-mp_pose = mp.solutions.pose
 
-hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)
-pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)
+hands = mp.solutions.hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)
+pose = mp.solutions.pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)
         
-detector = Detector(hands=hands, pose=pose)
+detector = DetectorCV(hands=hands, pose=pose)
 
 cap = cv2.VideoCapture(0)
 while cap.isOpened():
