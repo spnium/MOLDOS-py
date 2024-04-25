@@ -24,6 +24,7 @@ while cap.isOpened():
     detector.draw()
     print(detector.check_pose(4, "right"))
     
+    detector.display_output("MOLDOS")
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
 

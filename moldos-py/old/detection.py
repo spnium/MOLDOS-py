@@ -108,7 +108,7 @@ class Detector:
         def pose4():
             left_angle = calculate_angle(hip["left"], shoulder["left"], elbow["left"])
             right_angle = calculate_angle(hip["right"], shoulder["right"], elbow["right"])
-            return touching(hands[side][PINKY_MCP], elbow[anotherside], 60, 60)  and left_angle > 160 and right_angle > 160
+            return touching(hands[side][PINKY_TIP], elbow[anotherside], 60, 60)  and left_angle > 160 and right_angle > 160
         
         def pose5():
             return False
