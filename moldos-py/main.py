@@ -1,7 +1,7 @@
 from detector import *
 
-holistic = mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-detector = Detector(holistic, '/Users/maytanan/Desktop/frMOLDOS/training/body_language.pkl', flip_pose_horizontally=True)
+pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=1)
+detector = DetectorPose(pose, '/Users/maytanan/Desktop/frMOLDOS/training/body_language.pkl', flip_pose_horizontally=True)
 
 cap = cv2.VideoCapture(0)
 while cap.isOpened():
